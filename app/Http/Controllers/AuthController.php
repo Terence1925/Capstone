@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use App\Models\Subscribe;
 class AuthController extends Controller
 {
     public function register(Request $request) {
@@ -49,24 +50,28 @@ class AuthController extends Controller
             "token" => $token
         ], 201, [], JSON_PRETTY_PRINT);
     }
-    function logout(Request $request) {
-        $request->user()->tokens()->delete();
+    
+    function subscribe(Request $request) {
+        $fields = $request->validate([
+            "email_address" => "required|email|unique:users,email_address"
+        ]);
+        
+        $subscribe = Subscribe::create([
+            "email_address" => $fields["email_address"]
+        ]);
+       
+            return response()->json([
+
+            "message" => "User has been subscribed",
+        
+        ], 201, [], JSON_PRETTY_PRINT);
+    }
+    public function logout() {
+        auth()->user()->tokens()->delete();
 
         return response()->json([
             "message" => "Logged out"
         ], 200, [], JSON_PRETTY_PRINT);
     }
-    
-    function Subscribe(Request $request) {
-        $fields = $request->validate([
-            "email" => "required|email|unique:users,email"
-        ]);
-        $token = $user->createToken("secret")->plainTextToken;
-        return response()->json([
 
-            "message" => "User has been subscribed",
-            "user" => $user,
-            "token" => $token
-        ], 201, [], JSON_PRETTY_PRINT);
-    }
 }
